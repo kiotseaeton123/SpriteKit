@@ -9,8 +9,21 @@
 import UIKit
 import CoreMotion
 
+extension Date{
+    var yesterday: Date{
+        return Calendar.current.date(byAdding:.day, value: -1, to: self)!
+    }
+    var midnight:Date{
+        let cal = Calendar(identifier: .gregorian)
+        return cal.startOfDay(for: self)
+    }
+}
+
 class ViewController: UIViewController {
     
+    
+    @IBOutlet weak var playButton: UIButton!
+    let goalSteps: Float = 1000.0
     //MARK: class variables
     let activityManager = CMMotionActivityManager()
     let pedometer = CMPedometer()
@@ -19,7 +32,11 @@ class ViewController: UIViewController {
         willSet(newtotalSteps){
             DispatchQueue.main.async{
                 self.stepsSlider.setValue(newtotalSteps, animated: true)
-                self.stepsLabel.text = "Steps: \(newtotalSteps)"
+                self.stepsLabel.text = "Steps: \(newtotalSteps)/\(self.goalSteps)"
+                
+                if(self.totalSteps >= self.goalSteps){
+                    self.playButton.isEnabled = true
+                }
             }
         }
     }
@@ -34,11 +51,15 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.playButton.isEnabled = true
+        
+        self.playButton.setTitleColor(UIColor.gray, for: .disabled)
         self.totalSteps = 0.0
         self.startActivityMonitoring()
         self.startPedometerMonitoring()
-        self.startMotionUpdates()
+//        self.startMotionUpdates()
     }
+
 
     
     
@@ -55,17 +76,18 @@ class ViewController: UIViewController {
     
     // Raw motion handler, update a label
     func handleMotion(_ motionData:CMDeviceMotion?, error:Error?){
-        if let gravity = motionData?.gravity {
-            // assume phone is in portrait
-            // atan give angle of opposite over adjacent
-            //   (y is out top of phone, x is out the side)
-            //   but UI origin is top left with increasing down and to the right
-            //   therefore proper rotation is the angle pointing opposite of motion
-            //
-            let rotation = atan2(gravity.x, gravity.y) - Double.pi
-            self.isWalking.transform = CGAffineTransform(rotationAngle:
-                                                            CGFloat(rotation))
-        }
+//        print("here")
+//        if let gravity = motionData?.gravity {
+//            // assume phone is in portrait
+//            // atan give angle of opposite over adjacent
+//            //   (y is out top of phone, x is out the side)
+//            //   but UI origin is top left with increasing down and to the right
+//            //   therefore proper rotation is the angle pointing opposite of motion
+//            //
+//            let rotation = atan2(gravity.x, gravity.y) - Double.pi
+//            self.isWalking.transform = CGAffineTransform(rotationAngle:
+//                                                            CGFloat(rotation))
+//        }
     }
     
     // MARK: Activity Functions
@@ -74,6 +96,7 @@ class ViewController: UIViewController {
         if CMMotionActivityManager.isActivityAvailable(){
             // update from this queue (should we use the MAIN queue here??.... )
             self.activityManager.startActivityUpdates(to: OperationQueue.main, withHandler: self.handleActivity)
+            
         }
         
     }
@@ -83,16 +106,18 @@ class ViewController: UIViewController {
         // unwrap the activity and disp
         if let unwrappedActivity = activity {
             DispatchQueue.main.async{
-                self.isWalking.text = "Walking: \(unwrappedActivity.walking)\n Still: \(unwrappedActivity.stationary)"
+                self.isWalking.text = "Walking: \(unwrappedActivity.walking)\n Still: \(unwrappedActivity.stationary)\n Running: \(unwrappedActivity.running)\n Cycling: \(unwrappedActivity.cycling)\n Driving: \(unwrappedActivity.automotive)\n"
+                
             }
         }
     }
     
     // MARK: Pedometer Functions
     func startPedometerMonitoring(){
+        
         //separate out the handler for better readability
         if CMPedometer.isStepCountingAvailable(){
-            pedometer.startUpdates(from: Date(),withHandler: self.handlePedometer )
+            pedometer.startUpdates(from: Date().midnight,withHandler: self.handlePedometer )
         }
     }
     
