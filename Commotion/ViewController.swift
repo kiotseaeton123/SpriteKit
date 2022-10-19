@@ -60,7 +60,6 @@ class ViewController: UIViewController {
 //        self.startMotionUpdates()
     }
 
-
     
     
     // MARK: Raw Motion Functions
