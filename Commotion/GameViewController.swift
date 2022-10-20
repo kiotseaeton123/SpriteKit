@@ -11,10 +11,15 @@ import SpriteKit
 
 class GameViewController: UIViewController {
 
+    var stepCount: Float = 0.0
+    var goalSteps: Float = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         let scene = GameScene(size: view.bounds.size)
+        scene.numberBalls = Int(stepCount - goalSteps)
+        
         let skView = view as! SKView // the view in storyboard must be an SKView
     
         skView.showsFPS = true // show some debugging of the FPS

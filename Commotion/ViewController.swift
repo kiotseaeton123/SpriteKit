@@ -21,9 +21,12 @@ extension Date{
 
 class ViewController: UIViewController {
     
+        
     
     @IBOutlet weak var playButton: UIButton!
+    
     let goalSteps: Float = 1000.0
+    
     //MARK: class variables
     let activityManager = CMMotionActivityManager()
     let pedometer = CMPedometer()
@@ -124,6 +127,14 @@ class ViewController: UIViewController {
     func handlePedometer(_ pedData:CMPedometerData?, error:Error?){
         if let steps = pedData?.numberOfSteps {
             self.totalSteps = steps.floatValue
+        }
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.destination is GameViewController{
+            let gameViewController = segue.destination as? GameViewController
+            gameViewController?.stepCount = self.totalSteps
+            gameViewController?.goalSteps = self.goalSteps
         }
     }
 
