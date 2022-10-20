@@ -21,12 +21,7 @@ extension Date{
 
 class ViewController: UIViewController {
     
-        
-    
-    @IBOutlet weak var playButton: UIButton!
-    
     let goalSteps: Float = 1000.0
-    
     //MARK: class variables
     let activityManager = CMMotionActivityManager()
     let pedometer = CMPedometer()
@@ -34,7 +29,7 @@ class ViewController: UIViewController {
     var totalSteps: Float = 0.0 {
         willSet(newtotalSteps){
             DispatchQueue.main.async{
-                self.stepsSlider.setValue(newtotalSteps, animated: true)
+                self.circularView.value=newtotalSteps
                 self.stepsLabel.text = "Steps: \(newtotalSteps)/\(self.goalSteps)"
                 
                 if(self.totalSteps >= self.goalSteps){
@@ -48,7 +43,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var stepsSlider: UISlider!
     @IBOutlet weak var stepsLabel: UILabel!
     @IBOutlet weak var isWalking: UILabel!
+    @IBOutlet weak var playButton: UIButton!
+
     
+    @IBOutlet weak var circularView: RRCircularView!
     
     //MARK: View Hierarchy
     override func viewDidLoad() {
@@ -60,14 +58,25 @@ class ViewController: UIViewController {
         self.totalSteps = 0.0
         self.startActivityMonitoring()
         self.startPedometerMonitoring()
-//        self.startMotionUpdates()
+        
+        circularView.arrowImageView.image = UIImage(imageLiteralResourceName: "gren_round_arrow")
+        circularView.globImageView.image = UIImage(imageLiteralResourceName: "gren_round")
+        circularView.ringImageView.image = UIImage(imageLiteralResourceName: "round_color")
+        circularView.dotImageView.image = UIImage(imageLiteralResourceName: "black_dot")
+        circularView.tintColorImage = UIImage(imageLiteralResourceName: "gradient")
+ 
+        
+        circularView.minimumValue = 0
+        circularView.maximumValue = Double(goalSteps)
+        
+        circularView.value = totalSteps
+        
     }
-
     
     
     // MARK: Raw Motion Functions
     func startMotionUpdates(){
-        // some internal inconsistency here: we need to ask the device manager for device 
+        // some internal inconsistency here: we need to ask the device manager for device
         
         // TODO: should we be doing this from the MAIN queue? You may need to fix that!  ...
         if self.motion.isDeviceMotionAvailable{
@@ -78,18 +87,7 @@ class ViewController: UIViewController {
     
     // Raw motion handler, update a label
     func handleMotion(_ motionData:CMDeviceMotion?, error:Error?){
-//        print("here")
-//        if let gravity = motionData?.gravity {
-//            // assume phone is in portrait
-//            // atan give angle of opposite over adjacent
-//            //   (y is out top of phone, x is out the side)
-//            //   but UI origin is top left with increasing down and to the right
-//            //   therefore proper rotation is the angle pointing opposite of motion
-//            //
-//            let rotation = atan2(gravity.x, gravity.y) - Double.pi
-//            self.isWalking.transform = CGAffineTransform(rotationAngle:
-//                                                            CGFloat(rotation))
-//        }
+
     }
     
     // MARK: Activity Functions
@@ -137,7 +135,7 @@ class ViewController: UIViewController {
             gameViewController?.goalSteps = self.goalSteps
         }
     }
-
-
+    
+    
 }
 
